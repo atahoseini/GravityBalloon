@@ -16,36 +16,32 @@ namespace WpfApp1
     public partial class MainWindow : Window
     {
 
+        #region Global Variables
         List<Item> lstItems = new List<Item>();
         private DispatcherTimer animationTimer;
         private const double gravityConst = 0.1;
         private Dictionary<Item, Ellipse> itemEllipseMap = new Dictionary<Item, Ellipse>();
         bool isStart = false;
         private bool isDrawing = false;
-        private Point startPoint;
-        private Ellipse drawingEllipse;
+        private Point startPoints;
+        private Ellipse drwEllipse; 
+        #endregion
 
         public MainWindow()
         {
             InitializeComponent();
             ItemDataGrid.ItemsSource = lstItems;
-            //ItemCanvas.MouseEnter += ItemCanvas_MouseEnter;
-            //ItemCanvas.MouseLeave += ItemCanvas_MouseLeave;
-            //ItemCanvas.MouseLeftButtonDown += ItemCanvas_MouseLeftButtonDown;
-            //ItemCanvas.MouseLeftButtonUp += ItemCanvas_MouseLeftButtonUp;
-            //ItemCanvas.MouseMove += ItemCanvas_MouseMove;
-
         }
 
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
-            double x = ParseDouble(XTextBox.Text);
-            double y = ParseDouble(YTextBox.Text);
-            double size = ParseDouble(SizeTextBox.Text);
+            double x = ParseDouble(txtX.Text);
+            double y = ParseDouble(txtY.Text);
+            double size = ParseDouble(txtSize.Text);
 
             if (double.IsNaN(x) || double.IsNaN(y) || double.IsNaN(size))
             {
-                MessageBox.Show("Error");
+                MessageBox.Show("Error, check the inputs");
                 return;
             }
 
@@ -53,15 +49,15 @@ namespace WpfApp1
 
             Item newItem = new Item { id = newId, X = x, Y = y, Size = size };
 
-            newItem = AdjustShapePosition(newItem);
-         
-            var ellipse=DrawItem(newItem.X, newItem.Y, newItem.Size);
+            newItem = SetPosition(newItem);
+            var ellipse = DrawItem(newItem.X, newItem.Y, newItem.Size);
             lstItems.Add(newItem);
-            itemEllipseMap.Add(newItem, ellipse); // Add to the dictionary
+            itemEllipseMap.Add(newItem, ellipse); 
             UpdateDataGrid();
         }
-
-        private Item AdjustShapePosition(Item newItem)
+     
+        #region Position
+        private Item SetPosition(Item newItem)
         {
             foreach (var referenceItem in lstItems)
             {
@@ -73,13 +69,12 @@ namespace WpfApp1
                 {
                     foreach (var item in lstItems)
                     {
-                        newItem = AdjustPosition(newItem, item);                     
+                        newItem = AdjustPosition(newItem, item);
                     }
                 }
             }
             return newItem;
         }
-
         private Item AdjustPosition(Item newItem, Item existingItem)
         {
             bool overlap = CheckOverlap(newItem, existingItem);
@@ -90,7 +85,7 @@ namespace WpfApp1
                 double y = (newItem.Y + existingItem.Y) / 2;
 
                 // Generate a random offset
-                double offset = newItem.Size+5;// GenerateRandomOffset(existingItem.Size, newItem.Size);
+                double offset = newItem.Size + 5; //GenerateRandomOffset(existingItem.Size, newItem.Size);
 
                 int direction = new Random().Next(2);
 
@@ -111,7 +106,6 @@ namespace WpfApp1
                 {
                     newItem.X = x;
                     newItem.Y = y;
-                    newItem.Size = newItem.Size;
                 }
                 else
                 {
@@ -130,41 +124,23 @@ namespace WpfApp1
 
                     newItem.X = x;
                     newItem.Y = y;
-                    newItem.Size = newItem.Size;
                 }
             }
             return newItem;
         }
-
-
         private bool CheckOverlap(Item newItem, Item existingItem)
         {
             double distance = Math.Sqrt(Math.Pow(newItem.X - existingItem.X, 2) + Math.Pow(newItem.Y - existingItem.Y, 2));
             double minDistance = (newItem.Size + existingItem.Size) / 2;
             return distance < minDistance;
         }
-
-
+         #endregion
+     
         //private double GenerateRandomOffset(double size1, double size2)
         //{
         //    double maxSize = Math.Max(size1, size2);
         //    return (new Random().NextDouble() + 1) * maxSize;
         //}
-
-        private double ParseDouble(string value)
-        {
-            if (double.TryParse(value, out double result))
-            {
-                return result;
-            }
-            return double.NaN;
-        }
-
-        private void UpdateDataGrid()
-        {
-            ItemDataGrid.Items.Refresh(); 
-        }
-
         private Ellipse DrawItem(double x, double y, double size)
         {
             Random random = new Random();
@@ -174,9 +150,9 @@ namespace WpfApp1
             {
                 Width = size,
                 Height = size,
-                Fill = brush,
-                Stroke = brush, 
-                StrokeThickness = 3 
+                Fill = null,
+                Stroke = brush,
+                StrokeThickness = 3
             };
 
             Canvas.SetLeft(ellipse, x - (size / 2));
@@ -185,17 +161,6 @@ namespace WpfApp1
             ItemCanvas.Children.Add(ellipse);
             return ellipse;
         }
-
-        private void TextBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-            var textBox = sender as TextBox;
-            if (textBox != null && textBox.Text == "")
-            {
-                textBox.Text = "";
-                textBox.Foreground = Brushes.Black;
-            }
-        }
-       
         private void PlayButton_Click(object sender, RoutedEventArgs e)
         {
             if (isStart == false)
@@ -214,8 +179,6 @@ namespace WpfApp1
                 lblTimer.Content = "Stop";
             }
         }
-
-
         private void AnimationTimer_Tick(object sender, EventArgs e)
         {
             foreach (var item in lstItems)
@@ -251,80 +214,102 @@ namespace WpfApp1
                 }
             }
         }
+        private void drawingCanvas_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            drwEllipse = null;
+            startPoints = e.GetPosition(drawingCanvas);
+        }
+        private void drawingCanvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
+            {
+                double x = startPoints.X;
+                double y = startPoints.Y;
 
+                double width = e.GetPosition(drawingCanvas).X - startPoints.X;
+                double height = e.GetPosition(drawingCanvas).Y - startPoints.Y;
 
+                if (width < 0)
+                {
+                    x = e.GetPosition(drawingCanvas).X;
+                    width = -width;
+                }
 
-        //private void ItemCanvas_MouseEnter(object sender, MouseEventArgs e)
-        //{
-        //  //  if (!isDrawing)
-        //  //  {
-        //        Cursor = Cursors.Cross;
-        //  //  }
-        //}
+                if (height < 0)
+                {
+                    y = e.GetPosition(drawingCanvas).Y;
+                    height = -height;
+                }
 
-        //private void ItemCanvas_MouseLeave(object sender, MouseEventArgs e)
-        //{
-        //    if (!isDrawing)
-        //    {
-        //        Cursor = Cursors.Arrow;
-        //    }
-        //}
+                if (drwEllipse == null)
+                {
+                    drwEllipse = new Ellipse
+                    {
+                        Stroke = Brushes.Black,
+                        StrokeThickness = 2,
+                        Fill = Brushes.LightGray
+                    };
 
-        //private void ItemCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        //{
-        //    if (!isDrawing)
-        //    {
-        //        isDrawing = true;
-        //        startPoint = e.GetPosition(ItemCanvas);
-        //        drawingEllipse = new Ellipse
-        //        {
-        //            Stroke = Brushes.Black,
-        //            StrokeThickness = 2,
-        //            Width = 0,
-        //            Height = 0
-        //        };
-        //        Canvas.SetLeft(drawingEllipse, startPoint.X);
-        //        Canvas.SetTop(drawingEllipse, startPoint.Y);
-        //        ItemCanvas.Children.Add(drawingEllipse);
-        //    }
-        //}
+                    Canvas.SetLeft(drwEllipse, x);
+                    Canvas.SetTop(drwEllipse, y);
 
-        //private void ItemCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        //{
-        //    if (isDrawing)
-        //    {
-        //        isDrawing = false;
-        //        double width = Math.Abs(e.GetPosition(ItemCanvas).X - startPoint.X);
-        //        double height = Math.Abs(e.GetPosition(ItemCanvas).Y - startPoint.Y);
+                    drawingCanvas.Children.Add(drwEllipse);
+                }
 
-        //        if (width > 0 && height > 0)
-        //        {
-        //            Brush brush = Brushes.Transparent; // Set your desired brush
-        //            var newItem = new Item { id = lstItems.Count + 1, X = startPoint.X, Y = startPoint.Y, Size = Math.Max(width, height) };
-        //            newItem = AdjustShapePosition(newItem);
-        //            var ellipse = DrawItem(newItem.X, newItem.Y, newItem.Size);
-        //            lstItems.Add(newItem);
-        //            itemEllipseMap.Add(newItem, ellipse);
-        //            UpdateDataGrid();
-        //        }
+                drwEllipse.Width = width;
+                drwEllipse.Height = height;
+            }
+        }
+        private void drawingCanvas_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (drwEllipse != null)
+            {
+                double width = drwEllipse.Width;
+                double height = drwEllipse.Height;
 
-        //        ItemCanvas.Children.Remove(drawingEllipse);
-        //    }
-        //}
+                double centerX = Canvas.GetLeft(drwEllipse) + width / 2;
+                double centerY = Canvas.GetTop(drwEllipse) + height / 2;
 
-        //private void ItemCanvas_MouseMove(object sender, MouseEventArgs e)
-        //{
-        //    if (isDrawing)
-        //    {
-        //        double width = Math.Abs(e.GetPosition(ItemCanvas).X - startPoint.X);
-        //        double height = Math.Abs(e.GetPosition(ItemCanvas).Y - startPoint.Y);
-        //        Canvas.SetLeft(drawingEllipse, Math.Min(startPoint.X, e.GetPosition(ItemCanvas).X));
-        //        Canvas.SetTop(drawingEllipse, Math.Min(startPoint.Y, e.GetPosition(ItemCanvas).Y));
-        //        drawingEllipse.Width = width;
-        //        drawingEllipse.Height = height;
-        //    }
-        //}
+                double size = Math.Max(width, height);
 
+                txtX.Text = centerX.ToString();
+                txtY.Text = centerY.ToString();
+                txtSize.Text = size.ToString();
+                AddButton_Click(null,null);
+                drwEllipse = null;
+            }
+        }
+        private void Clear_Click(object sender, RoutedEventArgs e)
+        {
+            txtX.Text = "";
+            txtY.Text = "";
+            txtSize.Text = "";
+            ItemCanvas.Children.Clear();
+            lstItems.Clear();
+            itemEllipseMap.Clear();
+            UpdateDataGrid();
+        }
+        private double ParseDouble(string value)
+        {
+            if (double.TryParse(value, out double result))
+            {
+                return result;
+            }
+            return double.NaN;
+        }
+        private void TextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            var textBox = sender as TextBox;
+            if (textBox != null && textBox.Text == "")
+            {
+                textBox.Text = "";
+                textBox.Foreground = Brushes.Black;
+            }
+        }
+        private void UpdateDataGrid()
+        {
+            ItemDataGrid.Items.Refresh();
+        }
     }
 }
 

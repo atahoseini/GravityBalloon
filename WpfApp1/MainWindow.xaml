@@ -6,19 +6,19 @@
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
         Title="MainWindow" Height="585" Width="851" Background="#FFFBF5F5" BorderBrush="White">
-    <Grid Background="#FFF9F3F3">
+    <Grid Background="#FFF9F3F3" Margin="0,0,0,-6">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="443*"/>
             <ColumnDefinition Width="358*"/>
         </Grid.ColumnDefinitions>
         <Label  Content="X" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20" Margin="26,23,0,0"/>
-        <TextBox x:Name="XTextBox" GotFocus="TextBox_GotFocus" Margin="54,10,0,0" HorizontalAlignment="Left" Width="87" Height="39" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtX" GotFocus="TextBox_GotFocus" Margin="54,13,0,0" HorizontalAlignment="Left" Width="87" Height="39" VerticalAlignment="Top"/>
         <Label  Content="Y" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20" Margin="26,54,0,0" Height="29"/>
-        <TextBox x:Name="YTextBox" GotFocus="TextBox_GotFocus" Margin="55,59,0,0" HorizontalAlignment="Left" Width="87" Height="40" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtY" GotFocus="TextBox_GotFocus" Margin="55,59,0,0" HorizontalAlignment="Left" Width="87" Height="40" VerticalAlignment="Top"/>
         <Label  Content="SIZE" VerticalAlignment="Top" HorizontalAlignment="Left" Width="36" Margin="14,109,0,0"/>
-        <TextBox x:Name="SizeTextBox" GotFocus="TextBox_GotFocus" Margin="55,104,0,0" HorizontalAlignment="Left" Width="87" Height="41" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtSize" GotFocus="TextBox_GotFocus" Margin="55,104,0,0" HorizontalAlignment="Left" Width="87" Height="41" VerticalAlignment="Top"/>
 
-        <Button Content="Add" Click="AddButton_Click" Margin="55,152,0,375" HorizontalAlignment="Left" Width="87" Foreground="White">
+        <Button Content="Add" Click="AddButton_Click" Margin="55,152,0,0" HorizontalAlignment="Left" Width="87" Foreground="White" Height="42" VerticalAlignment="Top">
             <Button.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="Black"/>
@@ -26,7 +26,7 @@
                 </LinearGradientBrush>
             </Button.Background>
         </Button>
-        <Button Content="Play" Click="PlayButton_Click" Width="86" Margin="55,204,0,323" HorizontalAlignment="Left" Foreground="White">
+        <Button Content="Play" Click="PlayButton_Click" Width="86" Margin="55,204,0,0" HorizontalAlignment="Left" Foreground="White" Height="40" VerticalAlignment="Top">
             <Button.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="Black"/>
@@ -35,10 +35,24 @@
             </Button.Background>
         </Button>
 
-        <Canvas x:Name="ItemCanvas" VerticalAlignment="Top" Margin="158,10,27,0" Height="400" Grid.ColumnSpan="2" />
-        
+        <Canvas x:Name="ItemCanvas"  Margin="165,16,20,279" Height="400" Grid.ColumnSpan="2" />
+
         <DataGrid x:Name="ItemDataGrid" VerticalAlignment="Top" Height="133" AutoGenerateColumns="True" Margin="10,426,10,0" Grid.ColumnSpan="2"/>
-        <Label x:Name="lblTimer" Content="" VerticalAlignment="Top" HorizontalAlignment="Left" Width="102" Margin="48,259,0,0" Height="40"/>
+        <Label x:Name="lblTimer" Content="" VerticalAlignment="Top" HorizontalAlignment="Left" Width="102" Margin="50,289,0,0" Height="40" FontWeight="Bold" FontSize="14"/>
+        
+        <Canvas x:Name="drawingCanvas" Background="White" 
+                MouseDown="drawingCanvas_MouseDown" 
+                MouseMove="drawingCanvas_MouseMove" 
+                MouseUp="drawingCanvas_MouseUp" 
+                Grid.ColumnSpan="2" Margin="5,594,1,0" Height="96" VerticalAlignment="Top"/>
+        <Button Content="Clear" Click="Clear_Click" Width="86" Margin="55,249,0,0" HorizontalAlignment="Left" Foreground="White" Height="40" VerticalAlignment="Top">
+            <Button.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="Black"/>
+                    <GradientStop Color="#FFF55555" Offset="1"/>
+                </LinearGradientBrush>
+            </Button.Background>
+        </Button>
 
 
 
