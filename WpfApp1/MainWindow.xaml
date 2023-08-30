@@ -14,9 +14,9 @@
         <Label  Content="X" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20" Margin="26,23,0,0"/>
         <TextBox x:Name="XTextBox" GotFocus="TextBox_GotFocus" Margin="54,10,0,0" HorizontalAlignment="Left" Width="87" Height="39" VerticalAlignment="Top"/>
         <Label  Content="Y" VerticalAlignment="Top" HorizontalAlignment="Left" Width="20" Margin="26,54,0,0" Height="29"/>
-        <TextBox x:Name="YTextBox" GotFocus="TextBox_GotFocus" Margin="55,102,0,0" HorizontalAlignment="Left" Width="87" Height="40" VerticalAlignment="Top"/>
+        <TextBox x:Name="YTextBox" GotFocus="TextBox_GotFocus" Margin="55,59,0,0" HorizontalAlignment="Left" Width="87" Height="40" VerticalAlignment="Top"/>
         <Label  Content="SIZE" VerticalAlignment="Top" HorizontalAlignment="Left" Width="36" Margin="14,109,0,0"/>
-        <TextBox x:Name="SizeTextBox" GotFocus="TextBox_GotFocus" Margin="54,54,0,0" HorizontalAlignment="Left" Width="87" Height="41" VerticalAlignment="Top"/>
+        <TextBox x:Name="SizeTextBox" GotFocus="TextBox_GotFocus" Margin="55,104,0,0" HorizontalAlignment="Left" Width="87" Height="41" VerticalAlignment="Top"/>
 
         <Button Content="Add" Click="AddButton_Click" Margin="55,152,0,375" HorizontalAlignment="Left" Width="87" Foreground="White">
             <Button.Background>

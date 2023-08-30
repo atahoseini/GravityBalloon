@@ -52,6 +52,7 @@ namespace WpfApp1
             int newId = lstItems.Count > 0 ? lstItems.Max(item => item.id) + 1 : 1; // Determine the new id
 
             Item newItem = new Item { id = newId, X = x, Y = y, Size = size };
+
             newItem = AdjustShapePosition(newItem);
          
             var ellipse=DrawItem(newItem.X, newItem.Y, newItem.Size);
@@ -89,7 +90,7 @@ namespace WpfApp1
                 double y = (newItem.Y + existingItem.Y) / 2;
 
                 // Generate a random offset
-                double offset = GenerateRandomOffset(existingItem.Size, newItem.Size);
+                double offset = newItem.Size+5;// GenerateRandomOffset(existingItem.Size, newItem.Size);
 
                 int direction = new Random().Next(2);
 
@@ -110,6 +111,7 @@ namespace WpfApp1
                 {
                     newItem.X = x;
                     newItem.Y = y;
+                    newItem.Size = newItem.Size;
                 }
                 else
                 {
@@ -128,6 +130,7 @@ namespace WpfApp1
 
                     newItem.X = x;
                     newItem.Y = y;
+                    newItem.Size = newItem.Size;
                 }
             }
             return newItem;
@@ -142,11 +145,11 @@ namespace WpfApp1
         }
 
 
-        private double GenerateRandomOffset(double size1, double size2)
-        {
-            double maxSize = Math.Max(size1, size2);
-            return (new Random().NextDouble() + 1) * maxSize;
-        }
+        //private double GenerateRandomOffset(double size1, double size2)
+        //{
+        //    double maxSize = Math.Max(size1, size2);
+        //    return (new Random().NextDouble() + 1) * maxSize;
+        //}
 
         private double ParseDouble(string value)
         {
@@ -171,7 +174,7 @@ namespace WpfApp1
             {
                 Width = size,
                 Height = size,
-                Fill = null,
+                Fill = brush,
                 Stroke = brush, 
                 StrokeThickness = 3 
             };
