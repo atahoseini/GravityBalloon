@@ -1,4 +1,4 @@
-# Gravity Planet
+# Gravity Balloon or Planet
 
 ## Program Overview
 
