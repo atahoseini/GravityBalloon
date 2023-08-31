@@ -1,4 +1,4 @@
-# GravityBalloon
+# Gravity Planet
 
 ## Program Overview
 
