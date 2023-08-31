@@ -15,25 +15,22 @@ namespace WpfApp1
     /// </summary>
     public partial class MainWindow : Window
     {
-
         #region Global Variables
-        List<Item> lstItems = new List<Item>();
+        List<Planet> lstPlanet = new List<Planet>();
         private DispatcherTimer animationTimer;
-        private const double gravityConst = 0.1;
-        private Dictionary<Item, Ellipse> itemEllipseMap = new Dictionary<Item, Ellipse>();
+        private const double Gravity = 0.1;
+        private Dictionary<Planet, Ellipse> itemEllipseMap = new Dictionary<Planet, Ellipse>();
         bool isStart = false;
         private bool isDrawing = false;
         private Point startPoints;
-        private Ellipse drwEllipse; 
+        private Ellipse? drwEllipse; 
         #endregion
-
         public MainWindow()
         {
             InitializeComponent();
-            ItemDataGrid.ItemsSource = lstItems;
+            planetDG.ItemsSource = lstPlanet;
         }
-
-        private void AddButton_Click(object sender, RoutedEventArgs e)
+        private void btnAdd_Click(object sender, RoutedEventArgs e)
         {
             double x = ParseDouble(txtX.Text);
             double y = ParseDouble(txtY.Text);
@@ -45,50 +42,44 @@ namespace WpfApp1
                 return;
             }
 
-            int newId = lstItems.Count > 0 ? lstItems.Max(item => item.id) + 1 : 1; // Determine the new id
+            int newId = lstPlanet.Count > 0 ? lstPlanet.Max(Planet => Planet.id) + 1 : 1; // Determine the new id
 
-            Item newItem = new Item { id = newId, X = x, Y = y, Size = size };
+            Planet newPlanet = new Planet { id = newId, X = x, Y = y, Size = size };
 
-            newItem = SetPosition(newItem);
-            var ellipse = DrawItem(newItem.X, newItem.Y, newItem.Size);
-            lstItems.Add(newItem);
-            itemEllipseMap.Add(newItem, ellipse); 
+            newPlanet = SetPosition(newPlanet);
+            var ellipse = DrawItem(newPlanet.X, newPlanet.Y, newPlanet.Size);
+            lstPlanet.Add(newPlanet);
+            itemEllipseMap.Add(newPlanet, ellipse);
             UpdateDataGrid();
         }
-     
-        #region Position
-        private Item SetPosition(Item newItem)
+        private Planet SetPosition(Planet newPlanet)
         {
-            foreach (var referenceItem in lstItems)
+            foreach (var referenceItem in lstPlanet)
             {
-                if (lstItems.Count <= 1)
+                if (lstPlanet.Count <= 1)
                 {
-                    newItem = AdjustPosition(newItem, referenceItem);
+                    newPlanet = AdjustPosition(newPlanet, referenceItem);
                 }
                 else
                 {
-                    foreach (var item in lstItems)
+                    foreach (var Planet in lstPlanet)
                     {
-                        newItem = AdjustPosition(newItem, item);
+                        newPlanet = AdjustPosition(newPlanet, Planet);
                     }
                 }
             }
-            return newItem;
+            return newPlanet;
         }
-        private Item AdjustPosition(Item newItem, Item existingItem)
+        private Planet AdjustPosition(Planet newPlanet, Planet existingPlanet)
         {
-            bool overlap = CheckOverlap(newItem, existingItem);
+            bool overlap = CheckOverlap(newPlanet, existingPlanet);
             if (overlap)
             {
                 // Find the midpoint between the two items
-                double x = (newItem.X + existingItem.X) / 2;
-                double y = (newItem.Y + existingItem.Y) / 2;
-
-                // Generate a random offset
-                double offset = newItem.Size + 5; //GenerateRandomOffset(existingItem.Size, newItem.Size);
-
+                double x = (newPlanet.X + existingPlanet.X) / 2;
+                double y = (newPlanet.Y + existingPlanet.Y) / 2;
+                double offset = newPlanet.Size + 5; 
                 int direction = new Random().Next(2);
-
                 if (direction == 0)
                 {
                     x += offset;
@@ -98,49 +89,33 @@ namespace WpfApp1
                     y += offset;
                 }
 
-                double canvasX = Canvas.GetLeft(ItemCanvas);
-                double canvasY = Canvas.GetTop(ItemCanvas);
+                double left = Canvas.GetLeft(planetCanvas);
+                double right = Canvas.GetRight(planetCanvas);
+                double top = Canvas.GetTop(planetCanvas);
+                double bottom = Canvas.GetBottom(planetCanvas);
 
 
-                if (x < canvasX && x > 0 && y < canvasY && y > 0)
+                if ( (x+ offset > left && x + offset < right) && (y + offset > top && y + offset < bottom))
                 {
-                    newItem.X = x;
-                    newItem.Y = y;
+                    newPlanet.X = x;
+                    newPlanet.Y = y;
                 }
                 else
                 {
-                    // If the new position is outside the canvas, reverse the direction
-                    if (x < 0)
-                    {
-                        direction = 1;
-                    }
-                    else
-                    {
-                        direction = 0;
-                    }
-
-                    x += offset * direction;
-                    y += offset * direction;
-
-                    newItem.X = x;
-                    newItem.Y = y;
+                    x += offset * -1;
+                    y += offset * -1;
+                    newPlanet.X = x;
+                    newPlanet.Y = y;
                 }
             }
-            return newItem;
+            return newPlanet;
         }
-        private bool CheckOverlap(Item newItem, Item existingItem)
+        private bool CheckOverlap(Planet newPlanet, Planet existingPlanet)
         {
-            double distance = Math.Sqrt(Math.Pow(newItem.X - existingItem.X, 2) + Math.Pow(newItem.Y - existingItem.Y, 2));
-            double minDistance = (newItem.Size + existingItem.Size) / 2;
+            double distance = Distance(newPlanet, existingPlanet);
+            double minDistance = (newPlanet.Size + existingPlanet.Size) / 2;
             return distance < minDistance;
         }
-         #endregion
-     
-        //private double GenerateRandomOffset(double size1, double size2)
-        //{
-        //    double maxSize = Math.Max(size1, size2);
-        //    return (new Random().NextDouble() + 1) * maxSize;
-        //}
         private Ellipse DrawItem(double x, double y, double size)
         {
             Random random = new Random();
@@ -158,10 +133,10 @@ namespace WpfApp1
             Canvas.SetLeft(ellipse, x - (size / 2));
             Canvas.SetTop(ellipse, y - (size / 2));
 
-            ItemCanvas.Children.Add(ellipse);
+            planetCanvas.Children.Add(ellipse);
             return ellipse;
         }
-        private void PlayButton_Click(object sender, RoutedEventArgs e)
+        private void btnPay_Click(object sender, RoutedEventArgs e)
         {
             if (isStart == false)
             {
@@ -170,47 +145,42 @@ namespace WpfApp1
                 animationTimer.Tick += AnimationTimer_Tick;
                 animationTimer.Start();
                 isStart = true;
-                lblTimer.Content = "Start";
+                btnPlay.Content = "Stop";
             }
             else
             {
                 animationTimer.Stop();
                 isStart = false;
-                lblTimer.Content = "Stop";
+                btnPlay.Content = "Play";
             }
         }
         private void AnimationTimer_Tick(object sender, EventArgs e)
         {
-            foreach (var item in lstItems)
+            foreach (var currentPlanet in lstPlanet)
             {
-                foreach (var otherItem in lstItems)
+                foreach (var OtherPlanet in lstPlanet)
                 {
-                    if (item != otherItem)
+                    if (currentPlanet != OtherPlanet)
                     {
-                        double distance = Math.Sqrt(Math.Pow(otherItem.X - item.X, 2) + Math.Pow(otherItem.Y - item.Y, 2));
+                        double distance = Distance(currentPlanet, OtherPlanet);
                         if (distance >= 0)
                         {
-                            double force = gravityConst * item.Size * otherItem.Size / (distance * distance);
-                            double angle = Math.Atan2(otherItem.Y - item.Y, otherItem.X - item.X);
-                            double forceX = force * Math.Cos(angle);
-                            double forceY = force * Math.Sin(angle);
-
-                            item.X += forceX; // Update X position
-                            item.Y += forceY; // Update Y position
+                            CalculateForce(currentPlanet, OtherPlanet, out double forceX, out double forceY);
+                            currentPlanet.X += forceX;
+                            currentPlanet.Y += forceY;
                         }
-
-                        if (CheckOverlap(item, otherItem))
+                        if (CheckOverlap(currentPlanet, OtherPlanet))
                         {
-                            var itemnew = AdjustPosition(item, otherItem);
-                            item.X = itemnew.X;
-                            item.Y = itemnew.Y;
+                            var newLocation = AdjustPosition(currentPlanet, OtherPlanet);
+                            currentPlanet.X = newLocation.X;
+                            currentPlanet.Y = newLocation.Y;
                         }
                     }
                 }
-                if (itemEllipseMap.TryGetValue(item, out Ellipse ellipse))
+                if (itemEllipseMap.TryGetValue(currentPlanet, out Ellipse ellipse))
                 {
-                    Canvas.SetLeft(ellipse, item.X - item.Size / 2);
-                    Canvas.SetTop(ellipse, item.Y - item.Size / 2);
+                    Canvas.SetLeft(ellipse, currentPlanet.X - currentPlanet.Size / 2);
+                    Canvas.SetTop(ellipse, currentPlanet.Y - currentPlanet.Size / 2);
                 }
             }
         }
@@ -275,7 +245,7 @@ namespace WpfApp1
                 txtX.Text = centerX.ToString();
                 txtY.Text = centerY.ToString();
                 txtSize.Text = size.ToString();
-                AddButton_Click(null,null);
+                btnAdd_Click(null,null);
                 drwEllipse = null;
             }
         }
@@ -284,8 +254,8 @@ namespace WpfApp1
             txtX.Text = "";
             txtY.Text = "";
             txtSize.Text = "";
-            ItemCanvas.Children.Clear();
-            lstItems.Clear();
+            planetCanvas.Children.Clear();
+            lstPlanet.Clear();
             itemEllipseMap.Clear();
             UpdateDataGrid();
         }
@@ -308,10 +278,30 @@ namespace WpfApp1
         }
         private void UpdateDataGrid()
         {
-            ItemDataGrid.Items.Refresh();
+            planetDG.Items.Refresh();
+        }
+        private double Distance(Planet Planet1, Planet Planet12)
+        {
+            //distance = √((x2 - x1) ^ 2 + (y2 - y1) ^ 2)
+            return Math.Sqrt(Math.Pow(Planet1.X - Planet12.X, 2) + Math.Pow(Planet1.Y - Planet12.Y, 2));
+        }
+        private void CalculateForce(Planet currentPlanet, Planet otherPlanet, out double forceX, out double forceY)
+        {
+            double distance = Distance(currentPlanet, otherPlanet);
+            if (distance >= 0)
+            {
+                //calculating the gravitational force between two objects => (Gravity * mass1 * mass2) / (distance^2)
+                double force = Gravity * currentPlanet.Size * otherPlanet.Size / (distance * distance);
+                //calculating the angle θ between these two points => angle = atan2(y2 - y1, x2 - x1)
+                double angle = Math.Atan2(otherPlanet.Y - currentPlanet.Y, otherPlanet.X - currentPlanet.X);
+                forceX = force * Math.Cos(angle);
+                forceY = force * Math.Sin(angle);
+            }
+            else
+            {
+                forceX = 0;
+                forceY = 0;
+            }
         }
     }
 }
-
-
-
